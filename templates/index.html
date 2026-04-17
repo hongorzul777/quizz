@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Тэр ханхүү юу, мэлхий юу?</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="bg-shape shape1"></div>
+  <div class="bg-shape shape2"></div>
+
+  <main class="app">
+    <section class="card" id="startScreen">
+      <p class="eyebrow">найз залуугийн шалгалт 💖</p>
+      <h1>Ханхүү юу, мэлхий юу?</h1>
+      <p class="subtitle">
+         
+      </p>
+      <button class="main-btn" onclick="startQuiz()">Тест эхлүүлэх ✨</button>
+    </section>
+
+    <section class="card hidden" id="quizScreen">
+      <div class="top-row">
+        <p class="progress" id="progressText">Асуулт 1 / 10</p>
+        <p class="score-hint">Сайн бодож хариулаарай 😌</p>
+      </div>
+
+      <h2 id="questionText"></h2>
+      <div id="answersContainer" class="answers"></div>
+
+      <div class="nav-row">
+        <button class="secondary-btn" onclick="previousQuestion()">Өмнөх</button>
+        <button class="main-btn" onclick="nextQuestion()">Дараах</button>
+      </div>
+    </section>
+
+    <section class="card hidden" id="resultScreen">
+      <p class="eyebrow">📊 эцсийн дүгнэлт</p>
+      <h1 id="resultTitle"></h1>
+      <div id="resultEmoji" class="big-emoji"></div>
+      <p id="finalScoreText" class="subtitle"></p>
+      <p id="resultDescription" class="result-description"></p>
+      <button class="main-btn" onclick="restartQuiz()">Дахиад өгөх 😈</button>
+    </section>
+  </main>
+
+  <script>
+    const questions = [
+      {
+        question: "1. Миний орд аль нь вэ?",
+        answers: [
+          { text: "Загас", score: 0.0 },
+          { text: "Хонь", score: 0.0 },
+          { text: "Хумх", score: 1.0 },
+          { text: "Матар", score: 0.0 }
+        ]
+      },
+      {
+        question: "2. Миний хамгийн дуртай өнгө аль нь вэ?",
+        answers: [
+          { text: "Цагаан", score: 0.0 },
+          { text: "Ягаан", score: 1.0 },
+          { text: "Нил ягаан", score: 0.0 },
+          { text: "Улаан", score: 0.5 }
+        ]
+      },
+      {
+        question: "3. Миний хамгийн дуртай баяр аль нь вэ?",
+        answers: [
+          { text: "Шинэ жил", score: 1.0 },
+          { text: "Наадам", score: 0.0 },
+          { text: "Цагаан сар", score: 0.5 },
+          { text: "Валентин", score: 0.5 }
+        ]
+      },
+      {
+        question: "4. Миний хамгийн дуртай уух зүйл аль нь вэ?",
+        answers: [
+          { text: "Лимонтой ус", score: 0.0 },
+          { text: "Сүү", score: 1.0 },
+          { text: "Пиво", score: 0.0 },
+          { text: "Алимны шүүс", score: 0.0 }
+        ]
+      },
+      {
+        question: "5. Болзооны өмнө чи юу хийх ёстой вэ?",
+        answers: [
+          { text: "Ямар ресторанд хооллохоо л хайна", score: 0.75 },
+          { text: "Юу хийх вэ гэж надаас асууна", score: 0.25 },
+          { text: "Болзооны төлөвлөгөө, хийх зүйлсийг урьдчилж бодно", score: 1.0 },
+          { text: "\"Юун болзоо вэ?\" гэж асууна", score: 0.0 }
+        ]
+      },
+      {
+        question: "6. Гадуур хооллож байхдаа юу хийх ёстой вэ?",
+        answers: [
+          { text: "Утсаа ухна", score: 0.0 },
+          { text: "Өөр охидын story үзнэ", score: 0.0 },
+          { text: "Надтай ярина", score: 1.0 },
+          { text: "Унтана", score: 0.0 }
+        ]
+      },
+      {
+        question: "7. Чи надаас \"юм захих уу\" гэж асуухад би \"үгүй\" гэвэл чи юу хийх ёстой вэ?",
+        answers: [
+          { text: "Хүсэлтийг минь хүндлээд юу ч авчрахгүй", score: 0.0 },
+          { text: "Өөртөө л юм авчирна", score: 0.0 },
+          { text: "Just in case гээд миний дуртай snack-ийг авчирна", score: 1.0 },
+          { text: "Юм авч өгье гэж ятгана", score: 1.0 }
+        ]
+      },
+      {
+        question: "8. Би чиний хамгийн дуртай цамцыг авбал чи яах вэ?",
+        answers: [
+          { text: "Цагдаа дуудна", score: 0.0 },
+          { text: "Надаас буцаагаад булааж авна", score: 0.0 },
+          { text: "\"Чамд илүү гоё зохиж байна\" гэнэ", score: 1.0 },
+          { text: "Өөр нэг цамц санал болгоно", score: 0.5 }
+        ]
+      },
+      {
+        question: "9. Өөр эмэгтэй хүн чам руу хэт ойртож эхэлбэл чи юу хийх ёстой вэ?",
+        answers: [
+          { text: "Тэр хүнийг гомдоохгүй гэж бодоод зүгээр орхино", score: 0.0 },
+          { text: "Тоохгүй байна", score: 0.5 },
+          { text: "\"Зүгээр нийгмийн харилцаа\" гэж бодно", score: 0.0 },
+          { text: "Хүндэтгэлтэйгээр зай барьж, хил хязгаараа тодорхой тавина", score: 1.0 }
+        ]
+      },
+      {
+        question: "10. Би \"ямар нэг юм идмээр байна\" гэвэл чи юу хийх ёстой вэ?",
+        answers: [
+          { text: "Надад авч өгнө", score: 1.0 },
+          { text: "Кардаа өгөөд \"өөрөө авчих\" гэж хэлнэ", score: 0.5 },
+          { text: "\"Дараа\" гэнэ", score: 0.25 },
+          { text: "Сэдвээ солино", score: 0.0 }
+        ]
+      }
+    ];
+
+    let currentQuestion = 0;
+    let selectedAnswers = new Array(questions.length).fill(null);
+
+    function startQuiz() {
+      document.getElementById("startScreen").classList.add("hidden");
+      document.getElementById("quizScreen").classList.remove("hidden");
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const q = questions[currentQuestion];
+      document.getElementById("questionText").innerText = q.question;
+      document.getElementById("progressText").innerText =
+        `Асуулт ${currentQuestion + 1} / ${questions.length}`;
+
+      const container = document.getElementById("answersContainer");
+      container.innerHTML = "";
+
+      q.answers.forEach((answer, index) => {
+        const btn = document.createElement("button");
+        btn.className = "answer-btn";
+
+        if (selectedAnswers[currentQuestion] === index) {
+          btn.classList.add("selected");
+        }
+
+        btn.innerText = answer.text;
+        btn.onclick = () => selectAnswer(index);
+        container.appendChild(btn);
+      });
+    }
+
+    function selectAnswer(index) {
+      selectedAnswers[currentQuestion] = index;
+      showQuestion();
+    }
+
+    function previousQuestion() {
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        showQuestion();
+      }
+    }
+
+    function nextQuestion() {
+      if (selectedAnswers[currentQuestion] === null) {
+        alert("Эхлээд нэг хариулт сонгоно уу 😭");
+        return;
+      }
+
+      if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        showQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    async function showResults() {
+      let total = 0;
+
+      questions.forEach((q, i) => {
+        const selectedIndex = selectedAnswers[i];
+        total += q.answers[selectedIndex].score;
+      });
+
+      const maxScore = questions.length;
+      const percent = (total / maxScore) * 100;
+
+      document.getElementById("quizScreen").classList.add("hidden");
+      document.getElementById("resultScreen").classList.remove("hidden");
+
+      document.getElementById("finalScoreText").innerText =
+        `Оноо: ${total.toFixed(2)} / ${maxScore} (${percent.toFixed(0)}%)`;
+
+      const resultTitle = document.getElementById("resultTitle");
+      const resultEmoji = document.getElementById("resultEmoji");
+      const resultDescription = document.getElementById("resultDescription");
+
+      let finalTitle = "";
+
+      if (percent >= 85) {
+        finalTitle = "Тэр бол жинхэнэ ханхүү 👑";
+        resultTitle.innerText = finalTitle;
+        resultEmoji.innerText = "👑✨🤴";
+        resultDescription.innerText =
+          "Сэжигтэйгээр хэт сайн байна. 👀";
+      } else if (percent >= 65) {
+        finalTitle = "Ханхүү болох потенциалтай 😌";
+        resultTitle.innerText = finalTitle;
+        resultEmoji.innerText = "💐🙂";
+        resultDescription.innerText =
+          "Гайгүй ээ. Юмыг бол ойлгодог юм байна. Гэхдээ зарим тал дээр жаахан сурах хэрэгтэй.";
+      } else if (percent >= 45) {
+        finalTitle = "Мэлхий болох замдаа явж байна 🫠";
+        resultTitle.innerText = finalTitle;
+        resultEmoji.innerText = "🪷🐸";
+        resultDescription.innerText =
+          "Найдвар байгаа ч одоохондоо намагны уур амьсгал нэлээн их байна.";
+      } else {
+        finalTitle = "Баталгаажсан мэлхий 🐸";
+        resultTitle.innerText = finalTitle;
+        resultEmoji.innerText = "🐸🚩💀";
+        resultDescription.innerText =
+          "Өө хөөрхий, bare minimum дээр ч бүдэрч байна. Одоохондоо намаг руу буцааж, дахин сургалтанд хамрах шаардлагатай.";
+      }
+
+      try {
+        await fetch("/submit", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            answers: selectedAnswers,
+            score: total,
+            percent: percent,
+            result_title: finalTitle
+          })
+        });
+      } catch (error) {
+        console.log("Хариулт хадгалах үед алдаа гарлаа:", error);
+      }
+    }
+
+    function restartQuiz() {
+      currentQuestion = 0;
+      selectedAnswers = new Array(questions.length).fill(null);
+
+      document.getElementById("resultScreen").classList.add("hidden");
+      document.getElementById("startScreen").classList.remove("hidden");
+    }
+  </script>
+</body>
+</html>
