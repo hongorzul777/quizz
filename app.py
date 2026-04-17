@@ -31,3 +31,15 @@ def submit():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
+@app.route("/results")
+def view_results():
+    try:
+        with open("results.json", "r", encoding="utf-8") as f:
+            lines = f.readlines()
+            data = [json.loads(line) for line in lines]
+    except:
+        data = []
+
+    return jsonify(data)
+    
